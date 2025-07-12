@@ -59,9 +59,9 @@ jobs:
       #       --concurrency 5 \
       #       --cpu-boost
 
-      - name: Deploy to Cloud Functions
+      - name: Deploy ${{ matrix.service }} to Cloud Functions
         run: |
-          gcloud functions deploy $FUNCTION_NAME \
+          gcloud functions deploy ${{ matrix.service }} \
             --project ${{ secrets.GC_PROJECT_ID }} \
             --region ${{ secrets.GC_REGION }} \
             --runtime python311 \
