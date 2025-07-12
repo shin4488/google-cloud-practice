@@ -20,11 +20,13 @@ jobs:
 
       - id: set-functions
         name: Detect Changed Functions
+        # 差分から変更された関数ディレクトリ名を抽出
+        # mainブランチとの比較（用途によっては^1などに変更）
         run: |
-          # 差分から変更された関数ディレクトリ名を抽出
-          # mainブランチとの比較（用途によっては^1などに変更）
           functions=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^src/functions/' | cut -d/ -f3 | sort | uniq | jq -R -s -c 'split("\n") | map(select(. != ""))')
-          echo "functions=$functions"
+          if [ -z "$functions" ]; then
+            functions="[]"
+          fi
           echo "functions=$functions" >> $GITHUB_OUTPUT
 
   deploy-gc-cloudrun:
