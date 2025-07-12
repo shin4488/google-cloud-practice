@@ -52,6 +52,7 @@ jobs:
       #     gcloud builds submit src/functions/${{ matrix.service }} --tag $IMAGE_URI
       # IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
 
+      # https://cloud.google.com/run/docs/deploy-functions?hl=ja
       - name: Deploy ${{ matrix.service }} to Cloud Run
         run: |
           gcloud run deploy ${{ matrix.service }} \
