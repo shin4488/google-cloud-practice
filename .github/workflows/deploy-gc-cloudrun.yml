@@ -36,7 +36,7 @@ jobs:
         with:
           version: '>= 379.0.0'
 
-            - name: Build and Push Docker image for ${{ matrix.service }}
+      - name: Build and Push Docker image for ${{ matrix.service }}
         run: |
           IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
           gcloud builds submit src/functions/${{ matrix.service }} --tag $IMAGE_URI
