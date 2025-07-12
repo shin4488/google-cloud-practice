@@ -14,6 +14,9 @@ jobs:
       functions: ${{ steps.set-functions.outputs.functions }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          # 全履歴を取得する
+          fetch-depth: 0
 
       - id: set-functions
         name: Detect Changed Functions
