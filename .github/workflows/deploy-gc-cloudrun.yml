@@ -1,3 +1,4 @@
+# https://zenn.dev/cloud_ace/articles/7fe428ac4f25c8
 name: deploy-gc-cloudrun
 
 on:
@@ -49,31 +50,22 @@ jobs:
       #   run: |
       #     IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
       #     gcloud builds submit src/functions/${{ matrix.service }} --tag $IMAGE_URI
+      # IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
 
-      # - name: Deploy ${{ matrix.service }} to Cloud Run
-      #   run: |
-      #     IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
-      #     gcloud run deploy ${{ matrix.service }} \
-      #       --project ${{ secrets.GC_PROJECT_ID }} \
-      #       --region ${{ secrets.GC_REGION }} \
-      #       --source src/functions/${{ matrix.service }} \
-      #       --function main \
-      #       --platform managed \
-      #       --quiet \
-      #       --min-instances 1 \
-      #       --max-instances 1 \
-      #       --ingress internal \
-      #       --memory 512Mi \
-      #       --cpu 1 \
-      #       --execution-environment gen2 \
-      #       --timeout 300 \
-      #       --concurrency 5 \
-      #       --cpu-boost
-
-      # - name: Deploy to Cloud Run (functions)
-      #   uses: google-github-actions/deploy-cloudrun@v2
-      #   with:
-      #     service: ${{ matrix.service }}
-      #     project_id: ${{ secrets.GC_PROJECT_ID }}
-      #     region: ${{ secrets.GC_REGION }}
-      #     source: src/functions/${{ matrix.service }}
+      - name: Deploy ${{ matrix.service }} to Cloud Run
+        run: |
+          gcloud run deploy ${{ matrix.service }} \
+            --source src/functions/${{ matrix.service }} \
+            --function main \
+            --base-image python313 \
+            --region ${{ secrets.GC_REGION }} \
+            --project ${{ secrets.GC_PROJECT_ID }} \
+            --min-instances 1 \
+            --max-instances 1 \
+            --ingress internal \
+            --memory 512Mi \
+            --cpu 1 \
+            --execution-environment gen2 \
+            --timeout 300 \
+            --concurrency 3 \
+            --cpu-boost
