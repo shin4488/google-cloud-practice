@@ -4,6 +4,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+def main():
+    print("Hello from API Service!")
+
 # ヘルスチェック用エンドポイント（テスト）
 @app.route('/health', methods=['GET'])
 def health_check():

@@ -12,6 +12,9 @@ task_queue = []
 task_results = {}
 task_counter = 0
 
+def main():
+    print("Hello from API Service!")
+
 def process_task(task_id, task_data):
     """バックグラウンドでタスクを処理"""
     print(f"Processing task {task_id}: {task_data}")
