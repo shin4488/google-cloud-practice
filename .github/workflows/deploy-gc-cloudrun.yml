@@ -27,7 +27,7 @@ jobs:
           if [ -z "$functions" ]; then
             functions="[]"
           fi
-          echo "functions=$functions" >> $GITHUB_OUTPUT
+          echo "functions=$functions" >> "$GITHUB_OUTPUT"
 
   deploy-gc-cloudrun:
     runs-on: ubuntu-latest
