@@ -10,6 +10,12 @@ jobs:
   deploy-gc-cloudrun:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        service:
+          - api-service
+          - worker-service
+
     permissions:
       id-token: write
       contents: read
@@ -29,3 +35,27 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           version: '>= 379.0.0'
+
+            - name: Build and Push Docker image for ${{ matrix.service }}
+        run: |
+          IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
+          gcloud builds submit src/functions/${{ matrix.service }} --tag $IMAGE_URI
+
+      - name: Deploy ${{ matrix.service }} to Cloud Run
+        run: |
+          IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
+          gcloud run deploy ${{ matrix.service }} \
+            --image $IMAGE_URI \
+            --region ${{ secrets.GC_REGION }} \
+            --project ${{ secrets.GC_PROJECT_ID }} \
+            --platform managed \
+            --quiet \
+            --min-instances 1 \
+            --max-instances 1 \
+            --ingress internal \
+            --memory 512Mi \
+            --cpu 1 \
+            --execution-environment gen2 \
+            --timeout 300 \
+            --concurrency 5 \
+            --cpu-boost
