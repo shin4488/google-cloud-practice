@@ -8,14 +8,27 @@ on:
       - main
 
 jobs:
+  detect-changed-functions:
+    runs-on: ubuntu-latest
+    outputs:
+      functions: ${{ steps.set-functions.outputs.functions }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: set-functions
+        run: |
+          # 差分から変更された関数ディレクトリ名を抽出
+          # mainブランチとの比較（用途によっては^1などに変更）
+          functions=$(git diff --name-only origin/main | grep '^src/functions/' | cut -d/ -f3 | sort | uniq | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "functions=$functions"
+          echo "functions=$functions" >> $GITHUB_OUTPUT
+
   deploy-gc-cloudrun:
     runs-on: ubuntu-latest
-
+    if: needs.detect-changed-functions.outputs.functions != '[]'
     strategy:
       matrix:
-        service:
-          - api-service
-          - worker-service
+        service: ${{ fromJson(needs.detect-changed-functions.outputs.functions) }}
 
     permissions:
       id-token: write
