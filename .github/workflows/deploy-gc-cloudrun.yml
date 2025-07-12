@@ -36,10 +36,10 @@ jobs:
         with:
           version: '>= 379.0.0'
 
-      - name: Build and Push Docker image for ${{ matrix.service }}
-        run: |
-          IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
-          gcloud builds submit src/functions/${{ matrix.service }} --tag $IMAGE_URI
+      # - name: Build and Push Docker image for ${{ matrix.service }}
+      #   run: |
+      #     IMAGE_URI=gcr.io/${{ secrets.GC_PROJECT_ID }}/${{ matrix.service }}:${GITHUB_SHA}
+      #     gcloud builds submit src/functions/${{ matrix.service }} --tag $IMAGE_URI
 
       # - name: Deploy ${{ matrix.service }} to Cloud Run
       #   run: |
@@ -68,5 +68,3 @@ jobs:
           project_id: ${{ secrets.GC_PROJECT_ID }}
           region: ${{ secrets.GC_REGION }}
           source: src/functions/${{ matrix.service }}
-          runtime: python311
-          entry_point: main
