@@ -24,7 +24,7 @@ jobs:
         # mainブランチとの比較（用途によっては^1などに変更）
         run: |
           functions=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^src/functions/' | cut -d/ -f3 | sort | uniq | jq -R -s -c 'split("\n") | map(select(. != ""))')
-          echo "DEBUG functions is $functions"
+          echo "changed functions are $functions"
           echo "functions=$functions" >> "$GITHUB_OUTPUT"
 
   not-deploy-gc-cloudrun:
@@ -35,7 +35,6 @@ jobs:
       - name: Not Deploy
         run: |
           echo "No changes detected"
-          echo "output:${{ needs.detect-changed-functions.outputs.functions }}"
 
   deploy-gc-cloudrun:
     runs-on: ubuntu-latest
@@ -64,15 +63,6 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           version: '>= 379.0.0'
-
-      - name: Deploy ${{ matrix.service }} to Cloud Run
-        run: |
-          gcloud run deploy ${{ matrix.service }} \
-            --source src/functions/${{ matrix.service }} \
-            --function main \
-            --base-image python311 \
-            --project ${{ secrets.GC_PROJECT_ID }} \
-            --region ${{ secrets.GC_REGION }}
 
       # - name: Build and Push Docker image for ${{ matrix.service }}
       #   run: |
