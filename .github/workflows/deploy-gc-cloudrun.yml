@@ -24,6 +24,7 @@ jobs:
         # mainブランチとの比較（用途によっては^1などに変更）
         run: |
           functions=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^src/functions/' | cut -d/ -f3 | sort | uniq | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "DEBUG functions is $functions"
           echo "functions=$functions" >> "$GITHUB_OUTPUT"
 
   not-deploy-gc-cloudrun:
@@ -33,7 +34,7 @@ jobs:
       - name: Not Deploy
         run: |
           echo "No changes detected"
-          echo ${{ needs.detect-changed-functions.outputs.functions }}
+          echo "output:${{ needs.detect-changed-functions.outputs.functions }}"
 
   deploy-gc-cloudrun:
     runs-on: ubuntu-latest
