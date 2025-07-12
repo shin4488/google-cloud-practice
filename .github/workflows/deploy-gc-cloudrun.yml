@@ -28,7 +28,7 @@ jobs:
 
   not-deploy-gc-cloudrun:
     runs-on: ubuntu-latest
-    if: needs.detect-changed-functions.outputs.functions == '[]'
+    if: needs.detect-changed-functions.outputs.functions == '[]' || needs.detect-changed-functions.outputs.functions == ''
     steps:
       - name: Not Deploy
         run: |
@@ -37,7 +37,7 @@ jobs:
 
   deploy-gc-cloudrun:
     runs-on: ubuntu-latest
-    if: needs.detect-changed-functions.outputs.functions != '[]'
+    if: needs.detect-changed-functions.outputs.functions != '[]' && needs.detect-changed-functions.outputs.functions != ''
     strategy:
       matrix:
         service: ${{ fromJson(needs.detect-changed-functions.outputs.functions) }}
