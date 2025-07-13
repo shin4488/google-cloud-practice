@@ -1,0 +1,56 @@
+name: Upload SQLs to GCS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/queries/**/*.sql"
+
+jobs:
+  upload-to-gcs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+          # 全履歴を取得する
+          fetch-depth: 0
+
+    - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.GC_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GC_SERVICE_ACCOUNT }}
+
+    - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: '>= 379.0.0'
+
+    - name: Get changed and deleted SQL files
+      id: changed_files
+      # 差分ファイルリスト取得（A:追加、M:変更、D:削除のみ）
+      run: |
+        (git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep -E '^(A|M|D)\s+src/queries/.*\.sql$' || true) > changed_sql_status.txt
+        cat changed_sql_status.txt
+
+    - name: Upload changed SQL files to GCS
+      # 追加・変更をアップロードする（上書きOK）
+      run: |
+        grep -P '^[AM]\t' changed_sql_status.txt | cut -f2- | while read file; do
+          if [ -f "$file" ]; then
+            dest_path=${file#src/queries/}
+            gsutil cp "$file" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}"
+          fi
+        done
+
+    - name: Delete removed SQL files from GCS
+      # 削除したものはGCSからも削除する
+      run: |
+        grep -P '^D\t' changed_sql_status.txt | cut -f2- | while read file; do
+          dest_path=${file#src/queries/}
+          gsutil rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}" || true
+        done
