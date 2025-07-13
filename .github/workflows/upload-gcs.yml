@@ -40,20 +40,44 @@ jobs:
         (git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep -E '^(A|M|D|R)\s+src/queries/.*\.sql$' || true) > changed_sql_status.txt
         cat changed_sql_status.txt
 
-    - name: Upload changed SQL files to GCS
-      # 追加・変更をアップロードする（上書きOK）
-      run: |
-        grep -P '^[AM]\t' changed_sql_status.txt | cut -f2- | while read file; do
-          if [ -f "$file" ]; then
-            dest_path=${file#src/queries/}
-            gsutil cp "$file" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}"
-          fi
-        done
+    # - name: Upload changed SQL files to GCS
+    #   # 追加・変更をアップロードする（上書きOK）
+    #   run: |
+    #     grep -P '^[AM]\t' changed_sql_status.txt | cut -f2- | while read file; do
+    #       if [ -f "$file" ]; then
+    #         dest_path=${file#src/queries/}
+    #         gsutil cp "$file" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}"
+    #       fi
+    #     done
 
-    - name: Delete removed SQL files from GCS
-      # 削除したものはGCSからも削除する
+    # - name: Delete removed SQL files from GCS
+    #   # 削除したものはGCSからも削除する
+    #   run: |
+    #     grep -P '^D\t' changed_sql_status.txt | cut -f2- | while read file; do
+    #       dest_path=${file#src/queries/}
+    #       gsutil rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}" || true
+    #     done
+
+    - name: Process add/update/delete/rename SQL files to GCS
       run: |
-        grep -P '^D\t' changed_sql_status.txt | cut -f2- | while read file; do
-          dest_path=${file#src/queries/}
-          gsutil rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}" || true
-        done
+        while IFS=$'\t' read -r status old new; do
+          case "$status" in
+            A|M)
+              # 追加・修正→アップロード
+              dest_path=$(echo "$old" | sed 's|^src/queries/||')
+              gsutil cp "$old" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}"
+              ;;
+            D)
+              # 削除→GCSからも削除
+              dest_path=$(echo "$old" | sed 's|^src/queries/||')
+              gsutil rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}" || true
+              ;;
+            R*)
+              # リネーム→新ファイルをアップロード、旧ファイルを削除
+              old_dest=$(echo "$old" | sed 's|^src/queries/||')
+              new_dest=$(echo "$new" | sed 's|^src/queries/||')
+              gsutil cp "$new" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${new_dest}"
+              gsutil rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${old_dest}" || true
+              ;;
+          esac
+        done < changed_sql_status.txt
