@@ -18,12 +18,11 @@ jobs:
           # 全履歴を取得する
           fetch-depth: 0
 
-    - id: auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          workload_identity_provider: ${{ secrets.GC_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GC_SERVICE_ACCOUNT }}
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        workload_identity_provider: ${{ secrets.GC_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GC_SERVICE_ACCOUNT }}
 
     - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
