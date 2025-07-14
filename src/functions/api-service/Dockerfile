@@ -11,5 +11,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /app
 COPY . ./
 
-# gunicon を使って、Flask アプリケーションを起動
-# CMD exec gunicorn --bind :$PORT --workers 1 --threads 1 --timeout 0 main:app
+CMD ["functions-framework", "--target=main", "--port=8080"]
