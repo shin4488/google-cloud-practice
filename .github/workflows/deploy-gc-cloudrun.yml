@@ -78,6 +78,7 @@ jobs:
           gcloud run deploy ${{ matrix.service }} \
             --source src/functions/${{ matrix.service }} \
             --function main \
+            --clear-base-image \
             --region ${{ secrets.GC_REGION }} \
             --project ${{ secrets.GC_PROJECT_ID }} \
             --min-instances 1 \
