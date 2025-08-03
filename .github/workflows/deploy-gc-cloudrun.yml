@@ -69,6 +69,7 @@ jobs:
       # ← ここから追加：イメージのビルド＆プッシュ
       - name: Build & Push Docker image for ${{ matrix.service }}
         run: |
+          gcloud auth configure-docker ${{ secrets.GC_REGION }}-docker.pkg.dev
           # Artifact Registry の URI を組み立て
           IMAGE_URI=${{ secrets.GC_REGION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/cloud-run-source-deploy/${{ matrix.service }}:latest
           # Docker イメージをビルドして :latest タグを付与
@@ -86,8 +87,7 @@ jobs:
         run: |
           gcloud run deploy ${{ matrix.service }} \
             --source src/functions/${{ matrix.service }} \
-            --function main \
-            --clear-base-image \
+            --image=$IMAGE_URI
             --region ${{ secrets.GC_REGION }} \
             --project ${{ secrets.GC_PROJECT_ID }} \
             --min-instances 1 \
