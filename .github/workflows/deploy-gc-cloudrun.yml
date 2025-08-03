@@ -86,17 +86,16 @@ jobs:
       - name: Deploy ${{ matrix.service }} to Cloud Run
         run: |
           gcloud run deploy ${{ matrix.service }} \
-            --source src/functions/${{ matrix.service }} \
-            --image=$IMAGE_URI
+            --image $IMAGE_URI \
             --region ${{ secrets.GC_REGION }} \
             --project ${{ secrets.GC_PROJECT_ID }} \
-            --min-instances 1 \
-            --max-instances 1 \
-            --ingress internal \
-            --memory 512Mi \
-            --cpu 1 \
-            --execution-environment gen2 \
-            --timeout 300 \
-            --concurrency 3 \
-            --cpu-boost
             --labels=$GC_LABELS
+            # --min-instances 1 \
+            # --max-instances 1 \
+            # --ingress internal \
+            # --memory 512Mi \
+            # --cpu 1 \
+            # --execution-environment gen2 \
+            # --timeout 300 \
+            # --concurrency 3 \
+            # --cpu-boost
