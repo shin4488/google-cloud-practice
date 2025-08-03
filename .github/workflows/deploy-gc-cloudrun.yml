@@ -81,14 +81,16 @@ jobs:
 
       - name: Prepare labels
         run: echo "GC_LABELS=managed-by=github-actions,commit-sha=${GITHUB_SHA}" >> $GITHUB_ENV
-      
+
       # https://cloud.google.com/run/docs/deploy-functions?hl=ja
       - name: Deploy ${{ matrix.service }} to Cloud Run
         run: |
           gcloud run deploy ${{ matrix.service }} \
+            --source src/functions/${{ matrix.service }} \
             --image $IMAGE_URI \
             --region ${{ secrets.GC_REGION }} \
             --project ${{ secrets.GC_PROJECT_ID }} \
+            --service-account ${{ secrets.GC_SERVICE_ACCOUNT }} \
             --labels=$GC_LABELS
             # --min-instances 1 \
             # --max-instances 1 \
