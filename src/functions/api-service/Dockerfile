@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /app
 COPY . ./
 
-CMD ["functions-framework", "--target=main", "--port=8080"]
+CMD ["functions-framework", "--target=main2", "--port=8080"]
