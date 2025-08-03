@@ -86,7 +86,7 @@ jobs:
       - name: Deploy ${{ matrix.service }} to Cloud Run
         run: |
           gcloud run deploy ${{ matrix.service }} \
-            --source src/functions/${{ matrix.service }} \
+            --base-image $IMAGE_URI \
             --image $IMAGE_URI \
             --region ${{ secrets.GC_REGION }} \
             --project ${{ secrets.GC_PROJECT_ID }} \
