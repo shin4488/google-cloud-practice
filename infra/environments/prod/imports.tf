@@ -14,3 +14,14 @@ import {
   to = module.run.google_cloud_run_v2_service.api_service # 任意：Terraform 内でのローカル識別子
   id = "projects/${var.project_id}/locations/${var.region}/services/api-service" # 必須：完全修飾サービス ID と一致
 }
+
+# サービスアカウント
+import {
+  to = module.iam.google_service_account.action
+  id = "projects/${var.project_id}/serviceAccounts/${var.action_service_account_id}@${var.project_id}.iam.gserviceaccount.com"
+}
+
+import {
+  to = module.iam.google_service_account.terraform
+  id = "projects/${var.project_id}/serviceAccounts/${var.terraform_service_account_id}@${var.project_id}.iam.gserviceaccount.com"
+}
