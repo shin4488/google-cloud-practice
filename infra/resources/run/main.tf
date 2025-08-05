@@ -18,7 +18,7 @@ resource "google_cloud_run_v2_service" "api_service" {
       commit-sha = "dummy"
       managed-by = "github-actions"
     }
-    max_instance_request_concurrency = 3
+    max_instance_request_concurrency = 2
     revision                         = null
     service_account                  = var.action_service_account
     session_affinity                 = false
@@ -40,7 +40,7 @@ resource "google_cloud_run_v2_service" "api_service" {
           cpu    = "1"
           memory = "512Mi"
         }
-        startup_cpu_boost = true
+        startup_cpu_boost = false
       }
       startup_probe {
         failure_threshold     = 1
@@ -54,7 +54,7 @@ resource "google_cloud_run_v2_service" "api_service" {
     }
     scaling {
       max_instance_count = 1
-      min_instance_count = 1
+      min_instance_count = 0
     }
   }
   traffic {

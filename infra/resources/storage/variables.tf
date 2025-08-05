@@ -6,10 +6,14 @@ variable "project_id" {
 variable "region" {
   type        = string
   description = "Google Cloud リージョン"
-  default     = "asia-northeast1"
 }
 
-variable "action_service_account" {
+variable "terraform_state_bucket" {
   type        = string
-  description = "Google Cloud デフォルトサービスアカウント"
+  description = "Google Cloud Storage バケット名"
+}
+
+variable "sport_bucket" {
+  type        = string
+  description = "Google Cloud Storage バケット名"
 }

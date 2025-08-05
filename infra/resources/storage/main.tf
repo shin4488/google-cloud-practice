@@ -1,30 +1,12 @@
 # Google Cloud Storageの定義
 
-resource "google_storage_bucket" "workflows_sports" {
-  default_event_based_hold    = false
-  enable_object_retention     = false
-  force_destroy               = false
-  labels                      = {}
-  location                    = var.region
-  name                        = "workflows-sports"
-  project                     = var.project_id
-  public_access_prevention    = "enforced"
-  requester_pays              = false
-  rpo                         = null
-  storage_class               = "STANDARD"
-  uniform_bucket_level_access = true
-  soft_delete_policy {
-    retention_duration_seconds = 604800
-  }
-}
-
 resource "google_storage_bucket" "terraform_tfstate_manager" {
   default_event_based_hold    = false
   enable_object_retention     = false
   force_destroy               = false
   labels                      = {}
   location                    = var.region
-  name                        = "terraform-tfstate-manager"
+  name                        = var.terraform_state_bucket
   project                     = var.project_id
   public_access_prevention    = "enforced"
   requester_pays              = false
@@ -82,5 +64,23 @@ resource "google_storage_bucket" "terraform_tfstate_manager" {
   }
   versioning {
     enabled = true
+  }
+}
+
+resource "google_storage_bucket" "workflows_sports" {
+  default_event_based_hold    = false
+  enable_object_retention     = false
+  force_destroy               = false
+  labels                      = {}
+  location                    = var.region
+  name                        = var.sport_bucket
+  project                     = var.project_id
+  public_access_prevention    = "enforced"
+  requester_pays              = false
+  rpo                         = null
+  storage_class               = "STANDARD"
+  uniform_bucket_level_access = true
+  soft_delete_policy {
+    retention_duration_seconds = 604800
   }
 }
