@@ -10,6 +10,7 @@ services:
       - gcloud-config:/home/vscode/.config/gcloud
       # Cursor Server を永続化（ログイン状態などを保持）
       - cursor-server:/home/vscode/.cursor-server
+      - vscode-server:/home/vscode/.vscode-server
       - "../:/workspaces/google-cloud-practice"
     environment:
       HOME: /home/vscode
@@ -22,10 +23,11 @@ services:
       [
         "bash",
         "-lc",
-        "mkdir -p /home/vscode/.cursor-server /home/vscode/.config/gcloud/logs && chown -R vscode:vscode /home/vscode/.cursor-server /home/vscode/.config/gcloud && tail -f /dev/null",
+        "mkdir -p /home/vscode/.cursor-server /home/vscode/.vscode-server /home/vscode/.config/gcloud/logs && chown -R vscode:vscode /home/vscode/.cursor-server /home/vscode/.vscode-server /home/vscode/.config/gcloud && tail -f /dev/null",
       ]
     working_dir: /workspaces/google-cloud-practice
 
 volumes:
   gcloud-config:
   cursor-server:
+  vscode-server:
