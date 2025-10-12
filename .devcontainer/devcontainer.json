@@ -1,25 +1,22 @@
 {
   "name": "Cloud Run Local Dev (Python 3.12, DooD)",
-  // "build": {
-  //   "dockerfile": "Dockerfile",
-  //   "context": ".."
-  // },
-  "dockerComposeFile": "./docker-compose.yml",
-
-  "service": "analytics",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "remoteUser": "vscode",
-  "remoteEnv": {
-    "HOME": "/home/vscode",
-    "CLOUDSDK_CONFIG": "/home/vscode/.config/gcloud"
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
 
-  // A案: Docker-outside-of-Docker（ホストの Docker を使用）
-  // "features": {
-  //   "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-  // },
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "remoteUser": "vscode",
 
-  // VS Code 側の拡張（.vscode/settings.json はそのまま有効）
+  // コンテナ実行時オプション（compose の volumes/env/--init 相当）
+  "init": true,
+  "mounts": [
+    // DooD: ホストの Docker デーモンを使用
+    "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock",
+    // gcloud の設定を named volume に永続化（volume 名は固定で作られる）
+    "type=volume,source=gcloud-config,target=/home/vscode/.config/gcloud"
+  ],
+
   "customizations": {
     "vscode": {
       "extensions": [
