@@ -1,0 +1,31 @@
+services:
+  analytics:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    # DooD: ホストの Docker デーモンを使用
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # gcloud の設定を永続化
+      - gcloud-config:/home/vscode/.config/gcloud
+      # Cursor Server を永続化（ログイン状態などを保持）
+      - cursor-server:/home/vscode/.cursor-server
+      - "../:/workspaces/google-cloud-practice"
+    environment:
+      HOME: /home/vscode
+      # 明示しておくと拡張も SDK の場所を見失いにくい
+      CLOUDSDK_CONFIG: /home/vscode/.config/gcloud
+    init: true
+    tty: true
+    stdin_open: true
+    command:
+      [
+        "bash",
+        "-lc",
+        "mkdir -p /home/vscode/.cursor-server /home/vscode/.config/gcloud/logs && chown -R vscode:vscode /home/vscode/.cursor-server /home/vscode/.config/gcloud && tail -f /dev/null",
+      ]
+    working_dir: /workspaces/google-cloud-practice
+
+volumes:
+  gcloud-config:
+  cursor-server:
