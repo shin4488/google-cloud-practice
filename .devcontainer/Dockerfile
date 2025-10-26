@@ -12,6 +12,8 @@ https://packages.cloud.google.com/apt cloud-sdk main" \
    google-cloud-sdk-gke-gcloud-auth-plugin \
    kubectl \
    google-cloud-cli-skaffold \
+   google-cloud-cli \
+   google-cloud-cli-gke-gcloud-auth-plugin \
    google-cloud-cli-minikube
 
 # --- Docker CLI（Docker outside of Docker）---
