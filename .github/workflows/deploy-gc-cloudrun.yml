@@ -9,6 +9,9 @@ on:
     paths:
       - "src/functions/**"
 
+permissions:
+  contents: read
+
 jobs:
   detect-changed-functions:
     runs-on: ubuntu-latest
