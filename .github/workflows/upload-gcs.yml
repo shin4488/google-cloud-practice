@@ -17,19 +17,19 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
           # pushに複数コミットが含まれても、変更前のSHAとの差分を取れるよう履歴を残す。
           fetch-depth: 0
 
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
       with:
         workload_identity_provider: ${{ secrets.GC_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ secrets.GC_SERVICE_ACCOUNT }}
 
     - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
+      uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
       with:
         version: '>= 379.0.0'
 
@@ -40,24 +40,7 @@ jobs:
         (git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep -E '^(A|M|D|R.*)\s+src/queries/.*\.sql$' || true) > changed_sql_status.txt
         cat changed_sql_status.txt
 
-    # - name: Upload changed SQL files to GCS
-    #   # 追加・変更をアップロードする（上書きOK）
-    #   run: |
-    #     grep -P '^[AM]\t' changed_sql_status.txt | cut -f2- | while read file; do
-    #       if [ -f "$file" ]; then
-    #         dest_path=${file#src/queries/}
-    #         gsutil cp "$file" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}"
-    #       fi
-    #     done
-
-    # - name: Delete removed SQL files from GCS
-    #   # 削除したものはGCSからも削除する
-    #   run: |
-    #     grep -P '^D\t' changed_sql_status.txt | cut -f2- | while read file; do
-    #       dest_path=${file#src/queries/}
-    #       gsutil rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}" || true
-    #     done
-
+    # authが発行するWIF認証情報を使うため、gsutilではなくgcloud storageで操作する。
     - name: Process add/update/delete/rename SQL files to GCS
       run: |
         while IFS=$'\t' read -r status old new; do
@@ -65,19 +48,19 @@ jobs:
             A|M)
               # 追加・修正→アップロード
               dest_path=$(echo "$old" | sed 's|^src/queries/||')
-              gsutil cp "$old" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}"
+              gcloud storage cp "$old" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}"
               ;;
             D)
               # 削除→GCSからも削除
               dest_path=$(echo "$old" | sed 's|^src/queries/||')
-              gsutil rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}" || true
+              gcloud storage rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${dest_path}" || true
               ;;
             R*)
               # リネーム→新ファイルをアップロード、旧ファイルを削除
               old_dest=$(echo "$old" | sed 's|^src/queries/||')
               new_dest=$(echo "$new" | sed 's|^src/queries/||')
-              gsutil cp "$new" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${new_dest}"
-              gsutil rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${old_dest}" || true
+              gcloud storage cp "$new" "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${new_dest}"
+              gcloud storage rm "gs://${{ secrets.GCS_BUCKET_NAME }}/queries/${old_dest}" || true
               ;;
           esac
         done < changed_sql_status.txt
