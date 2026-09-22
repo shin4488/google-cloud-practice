@@ -10,8 +10,6 @@ on:
 jobs:
   upload-to-gcs:
     runs-on: ubuntu-latest
-    env:
-      CLOUDSDK_METRICS_ENVIRONMENT: datacloud.codex
 
     permissions:
       id-token: write
@@ -66,38 +64,3 @@ jobs:
               ;;
           esac
         done < changed_sql_status.txt
-
-    # 削除エラーを成功と誤認しないよう、検証用2オブジェクトの404を確認する。
-    - name: Verify deleted fixtures
-      env:
-        GCS_BUCKET_NAME: ${{ secrets.GCS_BUCKET_NAME }}
-      shell: python
-      run: |
-        import os
-        import subprocess
-        import urllib.error
-        import urllib.parse
-        import urllib.request
-        from pathlib import Path
-
-        expected = {f"src/queries/_verification/pr7/{name}.sql" for name in ("first", "second")}
-        deleted = {line.split("\t", 1)[1] for line in Path("changed_sql_status.txt").read_text().splitlines() if line.startswith("D\t")}
-        if deleted != expected:
-            raise SystemExit("Expected exactly the two fixture deletions")
-        token = subprocess.check_output(["gcloud", "auth", "print-access-token"], text=True).strip()
-        bucket = urllib.parse.quote(os.environ["GCS_BUCKET_NAME"], safe="")
-        for file in sorted(expected):
-            object_name = urllib.parse.quote("queries/" + file.removeprefix("src/queries/"), safe="")
-            request = urllib.request.Request(
-                f"https://storage.googleapis.com/storage/v1/b/{bucket}/o/{object_name}",
-                headers={"Authorization": f"Bearer {token}"},
-            )
-            try:
-                with urllib.request.urlopen(request, timeout=30) as response:
-                    raise SystemExit(f"Object still exists: {file}")
-            except urllib.error.HTTPError as error:
-                if error.code != 404:
-                    raise SystemExit(f"Deletion verification failed: HTTP {error.code}") from None
-            except urllib.error.URLError:
-                raise SystemExit("Deletion verification failed: network error") from None
-            print(f"Verified deleted object (HTTP 404): {file}")
