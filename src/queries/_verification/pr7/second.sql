@@ -1,0 +1,3 @@
+-- GCS upload verification fixture; intentionally contains no executable SQL.
+-- Revision: 1
+-- File: second.sql

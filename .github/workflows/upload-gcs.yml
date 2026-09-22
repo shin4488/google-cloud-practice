@@ -10,6 +10,8 @@ on:
 jobs:
   upload-to-gcs:
     runs-on: ubuntu-latest
+    env:
+      CLOUDSDK_METRICS_ENVIRONMENT: datacloud.codex
 
     permissions:
       id-token: write
@@ -64,3 +66,15 @@ jobs:
               ;;
           esac
         done < changed_sql_status.txt
+
+    # 実行可能なSQLを含まない2ファイルだけ、アップロード後の内容を照合する。
+    - name: Verify small upload fixtures
+      env:
+        GCS_BUCKET_NAME: ${{ secrets.GCS_BUCKET_NAME }}
+      run: |
+        for file in src/queries/_verification/pr7/first.sql src/queries/_verification/pr7/second.sql; do
+          if awk -F '\t' -v file="$file" '$1 ~ /^(A|M)$/ && $2 == file { found=1 } END { exit !found }' changed_sql_status.txt; then
+            gcloud storage cat "gs://${GCS_BUCKET_NAME}/queries/${file#src/queries/}" | cmp - "$file"
+            echo "Verified uploaded content: $file"
+          fi
+        done
