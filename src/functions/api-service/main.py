@@ -4,7 +4,6 @@ import functions_framework
 def main(request):
     print(request)
     return "Hello from Cloud Run!テスト8"
-    # テスト
 
 @functions_framework.http
 def main2(request):

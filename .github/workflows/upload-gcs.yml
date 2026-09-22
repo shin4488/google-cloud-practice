@@ -19,7 +19,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       with:
-          # 全履歴を取得する
+          # pushに複数コミットが含まれても、変更前のSHAとの差分を取れるよう履歴を残す。
           fetch-depth: 0
 
     - name: Authenticate to Google Cloud
