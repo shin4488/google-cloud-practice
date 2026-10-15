@@ -29,7 +29,7 @@ resource "google_storage_bucket" "terraform_tfstate_manager" {
       matches_suffix                          = []
       noncurrent_time_before                  = null
       num_newer_versions                      = 3
-      send_age_if_zero                        = true
+      send_age_if_zero                        = false
       send_days_since_custom_time_if_zero     = false
       send_days_since_noncurrent_time_if_zero = false
       send_num_newer_versions_if_zero         = false
@@ -52,7 +52,7 @@ resource "google_storage_bucket" "terraform_tfstate_manager" {
       matches_suffix                          = []
       noncurrent_time_before                  = null
       num_newer_versions                      = 0
-      send_age_if_zero                        = true
+      send_age_if_zero                        = false
       send_days_since_custom_time_if_zero     = false
       send_days_since_noncurrent_time_if_zero = false
       send_num_newer_versions_if_zero         = false

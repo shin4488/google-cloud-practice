@@ -66,7 +66,8 @@ resource "google_cloud_run_v2_service" "api_service" {
 
   lifecycle {
     ignore_changes = [
-      template[0].labels.commit-sha,
+      client_version,
+      template[0].labels["commit-sha"],
     ]
   }
 }
