@@ -1,4 +1,4 @@
-# Debian 12 (bookworm) ベースの Dev Containers Python 3.12
+# Debian 12 (bookworm) ベースの Dev Containers Python 3.14
 FROM mcr.microsoft.com/devcontainers/python:3.14-bookworm
 
 # Google Cloud SDK を APT 経由でインストール（バージョン固定したければ "=<version>" 指定）
