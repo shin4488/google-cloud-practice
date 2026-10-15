@@ -1,0 +1,51 @@
+version: 2
+updates:
+  # mainへのマージで本番へ反映されるため、更新はエコシステムごとに週1件のPRへまとめる。
+  - package-ecosystem: pip
+    directories:
+      - /
+      - /src/functions/api-service
+      - /src/functions/worker-service
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      pip:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directories:
+      - /.devcontainer
+      - /src/functions/api-service
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      docker:
+        patterns:
+          - "*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: terraform
+    directory: /infra/environments/prod
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      terraform:
+        patterns:
+          - "*"
