@@ -1,5 +1,5 @@
 {
-  "name": "Cloud Run Local Dev (Python 3.12, DooD)",
+  "name": "Cloud Run Local Dev (Python 3.14, DooD)",
   "build": {
     "dockerfile": "Dockerfile",
     "context": ".."
