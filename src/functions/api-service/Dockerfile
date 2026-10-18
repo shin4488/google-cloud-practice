@@ -1,5 +1,5 @@
 # https://zenn.dev/abaoaqu/articles/00f87b9f99bc9e
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # Cloud Run のログに、ステートメントとログメッセージが即座に出力されるようにする
 ENV PYTHONUNBUFFERED True
