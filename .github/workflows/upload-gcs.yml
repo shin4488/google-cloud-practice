@@ -35,7 +35,7 @@ jobs:
 
     - name: Get changed and deleted SQL files
       id: changed_files
-      # 差分ファイルリスト取得（A:追加、M:変更、D:削除のみ）
+      # git diff の状態のうち、A（追加）・M（変更）・D（削除）・R（名前変更）の行だけを残す
       run: |
         (git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep -E '^(A|M|D|R.*)\s+src/queries/.*\.sql$' || true) > changed_sql_status.txt
         cat changed_sql_status.txt

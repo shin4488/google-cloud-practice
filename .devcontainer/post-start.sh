@@ -6,4 +6,5 @@ set -euo pipefail
 sudo mkdir -p /home/vscode/.config/gcloud/logs
 sudo chown -R vscode:vscode /home/vscode/.config/gcloud
 
+# マウントしたホストの Docker ソケットを、vscode ユーザーからも使えるようにする
 sudo chmod o=rw /var/run/docker.sock

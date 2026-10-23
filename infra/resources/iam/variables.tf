@@ -15,10 +15,10 @@ variable "owner_roles" {
 
 variable "action_service_account_id" {
   type        = string
-  description = "Google Cloud Action用サービスアカウント"
+  description = "GitHub Actions 用サービスアカウントのアカウント ID"
 }
 
 variable "terraform_service_account_id" {
   type        = string
-  description = "Google Cloud Terraform用サービスアカウント"
+  description = "Terraform の実行に使うサービスアカウントのアカウント ID"
 }

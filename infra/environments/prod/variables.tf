@@ -11,12 +11,12 @@ variable "region" {
 
 variable "action_service_account_id" {
   type        = string
-  description = "Google Cloud デフォルトサービスアカウント"
+  description = "GitHub Actions 用サービスアカウントのアカウント ID"
 }
 
 variable "terraform_service_account_id" {
   type        = string
-  description = "Google Cloud デフォルトサービスアカウント"
+  description = "Terraform の実行に使うサービスアカウントのアカウント ID"
 }
 
 variable "terraform_state_bucket" {
