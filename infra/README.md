@@ -5,23 +5,21 @@
 ## 既存リソースのインポート
 
 1. `terraform init` を実行します。
-2. `import` ブロックの `to` に、モジュールを含まないアドレスを書きます（下の例）。
+2. `import` ブロックの `to` に、モジュールを含まないアドレスを書きます（下の例の「手順 2」）。モジュール内のアドレスを書くと、そのモジュールに resource ブロックが必要になるためです。
 3. `terraform plan -generate-config-out="generated.tf"` を実行し、resource ブロックを generated.tf に出力します。
 4. generated.tf の内容をもとに、`infra/resources/` のモジュールに resource ブロックを書きます。
-5. `import` ブロックの `to` を、resource ブロックを書いたモジュールのアドレスに書き換え、generated.tf を削除します。
-
-`to` にモジュール内のアドレスを書くと、そのモジュールに resource ブロックが必要になるため、設定を生成するときはモジュールを含まないアドレスを書きます。
+5. `import` ブロックの `to` を、resource ブロックを書いたモジュールのアドレス（下の例の「手順 5」）に書き換え、generated.tf を削除します。
 
 ```terraform
-# NG
+# 手順 2: 設定を生成するときのアドレス
 import {
-  to = module.storage.google_storage_bucket.workflows_sports
+  to = google_storage_bucket.workflows_sports
   id = "workflows-sports"
 }
 
-# OK
+# 手順 5: モジュールに resource ブロックを書いた後のアドレス
 import {
-  to = google_storage_bucket.workflows_sports
+  to = module.storage.google_storage_bucket.workflows_sports
   id = "workflows-sports"
 }
 ```

@@ -5,7 +5,7 @@ variable "project_id" {
 
 variable "owner_email" {
   type        = string
-  description = "オーナーのメールアドレス"
+  description = "オーナーの IAM メンバー（user:<メールアドレス> の形式）"
 }
 
 variable "owner_roles" {

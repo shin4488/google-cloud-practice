@@ -10,7 +10,7 @@ variable "region" {
 
 variable "terraform_state_bucket" {
   type        = string
-  description = "Google Cloud Storage バケット名"
+  description = "Terraform の state を保存するバケットの名前"
 }
 
 variable "sport_bucket" {

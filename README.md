@@ -36,10 +36,10 @@ flowchart LR
 
 | ワークフロー | 実行される条件 | 処理 |
 | --- | --- | --- |
-| [deploy-gc-cloudrun.yml](.github/workflows/deploy-gc-cloudrun.yml) | main への push で `src/functions/` 以下が変わったとき | 変更があったサービスごとに、そのディレクトリの Dockerfile でイメージをビルドして Artifact Registry に push し、同じ名前の Cloud Run サービスにデプロイします |
+| [deploy-gc-cloudrun.yml](.github/workflows/deploy-gc-cloudrun.yml) | main への push で `src/functions/` 以下が変わったとき | 変更があったサービスごとに、そのディレクトリの Dockerfile でイメージをビルドして Artifact Registry に push し、同じ名前の Cloud Run サービスにデプロイします。Dockerfile がないサービス（worker-service）は `docker build` が失敗するため、デプロイされません |
 | [upload-gcs.yml](.github/workflows/upload-gcs.yml) | main への push で `src/queries/` 以下の `.sql` が変わったとき | 追加・変更した SQL をアップロードし、削除した SQL はバケットからも削除します。名前を変えた SQL は、新しい名前でアップロードして古い名前のものを削除します。`src/queries/<パス>` は `gs://<バケット>/queries/<パス>` に置かれます |
 
-Terraform（`infra/`）と Workflows（`src/workflows/`）を反映するワークフローはありません。
+Terraform（`infra/`）と Workflows の定義（`src/workflows/`）は、GitHub Actions では反映しません。
 
 Google Cloud への認証には Workload Identity 連携を使います。GitHub リポジトリの Secrets に次の値を設定します。
 

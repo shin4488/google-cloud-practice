@@ -21,7 +21,7 @@ variable "terraform_service_account_id" {
 
 variable "terraform_state_bucket" {
   type        = string
-  description = "Google Cloud Storage バケット名"
+  description = "Terraform の state を保存するバケットの名前"
 }
 
 variable "sport_bucket" {
@@ -31,7 +31,7 @@ variable "sport_bucket" {
 
 variable "owner_email" {
   type        = string
-  description = "オーナーのメールアドレス"
+  description = "オーナーの IAM メンバー（user:<メールアドレス> の形式）"
 }
 
 variable "owner_roles" {
