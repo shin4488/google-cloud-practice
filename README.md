@@ -36,7 +36,7 @@ flowchart LR
 
 | ワークフロー | 実行される条件 | 処理 |
 | --- | --- | --- |
-| [deploy-gc-cloudrun.yml](.github/workflows/deploy-gc-cloudrun.yml) | main への push で `src/functions/` 以下が変わったとき | 変更があったサービスごとに、そのディレクトリの Dockerfile でイメージをビルドして Artifact Registry に push し、同じ名前の Cloud Run サービスにデプロイします。Dockerfile がないサービス（worker-service）は `docker build` が失敗するため、デプロイされません |
+| [deploy-gc-cloudrun.yml](.github/workflows/deploy-gc-cloudrun.yml) | main への push で `src/functions/` 以下が変わったとき | 変更があったサービスごとに、そのディレクトリの Dockerfile でイメージをビルドして Artifact Registry に push し、同じ名前の Cloud Run サービスにデプロイします。Dockerfile がないサービス（worker-service）は `docker build` が失敗するため、デプロイされません。[`strategy.fail-fast`](https://docs.github.com/ja/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstrategyfail-fast) を指定しておらず既定値の `true` になるため、worker-service のジョブが失敗すると、同じ push で実行中・待機中のほかのサービスのジョブもキャンセルされます |
 | [upload-gcs.yml](.github/workflows/upload-gcs.yml) | main への push で `src/queries/` 以下の `.sql` が変わったとき | 追加・変更した SQL をアップロードし、削除した SQL はバケットからも削除します。名前を変えた SQL は、新しい名前でアップロードして古い名前のものを削除します。`src/queries/<パス>` は `gs://<バケット>/queries/<パス>` に置かれます |
 
 Terraform（`infra/`）と Workflows の定義（`src/workflows/`）は、GitHub Actions では反映しません。
