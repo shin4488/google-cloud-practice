@@ -8,7 +8,7 @@ Google CloudのHTTP関数・ワークフロー・インフラを試すリポジ�
 - HTTP関数のローカル確認は、分離したPython環境で対象サービスの依存を用意し、そのディレクトリで `functions-framework --target <関数名> --source main.py` を入口にする。Dockerfileがあるサービスは、その `CMD` の `--target` と同じ関数を指定する。依存をホスト全体へインストールしない。
 - Terraform変更時は [infra/README](infra/README.md)と `infra/environments/prod/`・変更するresourceを確認する。`terraform fmt -check <対象.tf>` はローカル確認、validateは初期化済みの対象moduleで行う。
 - Cloudへの通信・リソース変更はローカル構文確認と区別する。対象プロジェクト・認証・実行権限を確認し、デプロイ・適用・データ更新は依頼された範囲で行う。認証用ファイルや環境固有値を文書・ログ・コミットへ転記しない。
-- mainへのpushでCloudへの反映が起きる。対象パスとトリガーは `.github/workflows/deploy-gc-cloudrun.yml` と `upload-gcs.yml` を確認する。公開範囲（Cloud Runのingress、バケットの公開アクセスの防止）は `infra/resources/` のTerraformで設定している。
+- mainへのpushと、`deploy-gc-cloudrun.yml` の手動実行（Dockerfileがあるすべてのサービスをデプロイする）でCloudへの反映が起きる。対象パスとトリガーは `.github/workflows/deploy-gc-cloudrun.yml` と `upload-gcs.yml` を確認する。公開範囲（Cloud Runのingress、バケットの公開アクセスの防止）は `infra/resources/` のTerraformで設定している。
 
 ## 作業の進め方
 

@@ -25,9 +25,22 @@ jobs:
 
       - id: set-functions
         name: Detect Changed Functions
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
-          functions=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^src/functions/' | cut -d/ -f3 | sort | uniq | jq -R -s -c 'split("\n") | map(select(. != ""))')
-          echo "changed functions are $functions"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            # 手動実行のイベントにはpush前のSHAがなく差分を取れないため、すべてのサービスを候補にする。
+            paths=$(git ls-files -- src/functions/)
+          else
+            paths=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- src/functions/)
+          fi
+          # Dockerfileがないサービスはイメージをビルドできないため除く。削除されたサービスのディレクトリもここで除かれる。
+          functions=$(for service in $(echo "$paths" | cut -d/ -f3 | sort -u); do
+            if [ -f "src/functions/$service/Dockerfile" ]; then
+              echo "$service"
+            fi
+          done | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "functions to deploy are $functions"
           echo "functions=$functions" >> "$GITHUB_OUTPUT"
 
   not-deploy-gc-cloudrun:
