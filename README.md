@@ -36,7 +36,7 @@ flowchart LR
 
 | ワークフロー | 実行される条件 | 処理 |
 | --- | --- | --- |
-| [deploy-gc-cloudrun.yml](.github/workflows/deploy-gc-cloudrun.yml) | main への push で `src/functions/` 以下が変わったとき、または手動実行（`workflow_dispatch`）したとき | ディレクトリに Dockerfile があるサービスのうち、push で変更があったもの（手動実行ではすべて）ごとに、その Dockerfile でイメージをビルドして Artifact Registry に push し、同じ名前の Cloud Run サービスにデプロイします。Dockerfile がないサービス（worker-service）と、push で削除されたサービスはデプロイしません |
+| [deploy-gc-cloudrun.yml](.github/workflows/deploy-gc-cloudrun.yml) | main への push で `src/functions/` 以下が変わったとき、または手動実行（`workflow_dispatch`）したとき | ディレクトリに Dockerfile があるサービスのうち、push で変更があったもの（手動実行ではすべて）ごとに、その Dockerfile でイメージをビルドして Artifact Registry に push し、同じ名前の Cloud Run サービスにデプロイします。Dockerfile がないサービス（worker-service）と、push で削除されたサービスはデプロイしません。手動実行で main 以外のブランチやタグを選んだときは、何もデプロイしません |
 | [upload-gcs.yml](.github/workflows/upload-gcs.yml) | main への push で `src/queries/` 以下の `.sql` が変わったとき | 追加・変更した SQL をアップロードし、削除した SQL はバケットからも削除します。名前を変えた SQL は、新しい名前でアップロードして古い名前のものを削除します。`src/queries/<パス>` は `gs://<バケット>/queries/<パス>` に置かれます |
 
 Terraform（`infra/`）と Workflows の定義（`src/workflows/`）は、GitHub Actions では反映しません。

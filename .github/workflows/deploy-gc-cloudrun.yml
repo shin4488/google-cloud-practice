@@ -28,11 +28,15 @@ jobs:
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+          if [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]; then
+            paths=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- src/functions/)
+          elif [ "$GITHUB_REF" = "refs/heads/main" ]; then
             # 手動実行のイベントにはpush前のSHAがなく差分を取れないため、すべてのサービスを候補にする。
             paths=$(git ls-files -- src/functions/)
           else
-            paths=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- src/functions/)
+            # pushのトリガーと同じく、main以外のブランチやタグの内容は本番へデプロイしない。
+            echo "manual runs deploy only from refs/heads/main, not $GITHUB_REF"
+            paths=""
           fi
           # Dockerfileがないサービスはイメージをビルドできないため除く。削除されたサービスのディレクトリもここで除かれる。
           functions=$(for service in $(echo "$paths" | cut -d/ -f3 | sort -u); do
