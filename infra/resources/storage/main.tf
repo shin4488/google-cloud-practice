@@ -1,5 +1,3 @@
-# Google Cloud Storageの定義
-
 resource "google_storage_bucket" "terraform_tfstate_manager" {
   default_event_based_hold    = false
   enable_object_retention     = false

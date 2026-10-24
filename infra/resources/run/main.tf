@@ -64,6 +64,7 @@ resource "google_cloud_run_v2_service" "api_service" {
     type     = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
   }
 
+  # client_version と commit-sha ラベルは GitHub Actions の gcloud run deploy がデプロイのたびに書き換えるため、差分として扱わない。
   lifecycle {
     ignore_changes = [
       client_version,

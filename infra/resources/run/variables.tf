@@ -10,5 +10,5 @@ variable "region" {
 
 variable "action_service_account" {
   type        = string
-  description = "Google Cloud デフォルトサービスアカウント"
+  description = "Cloud Run サービスを実行するサービスアカウントのメールアドレス"
 }

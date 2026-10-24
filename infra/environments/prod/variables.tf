@@ -9,24 +9,19 @@ variable "region" {
   default     = "asia-northeast1"
 }
 
-variable "default_service_account" {
-  type        = string
-  description = "Google Cloud デフォルトサービスアカウント"
-}
-
 variable "action_service_account_id" {
   type        = string
-  description = "Google Cloud デフォルトサービスアカウント"
+  description = "GitHub Actions 用サービスアカウントのアカウント ID"
 }
 
 variable "terraform_service_account_id" {
   type        = string
-  description = "Google Cloud デフォルトサービスアカウント"
+  description = "Terraform の実行に使うサービスアカウントのアカウント ID"
 }
 
 variable "terraform_state_bucket" {
   type        = string
-  description = "Google Cloud Storage バケット名"
+  description = "Terraform の state を保存するバケットの名前"
 }
 
 variable "sport_bucket" {
@@ -36,7 +31,7 @@ variable "sport_bucket" {
 
 variable "owner_email" {
   type        = string
-  description = "オーナーのメールアドレス"
+  description = "オーナーの IAM メンバー（user:<メールアドレス> の形式）"
 }
 
 variable "owner_roles" {

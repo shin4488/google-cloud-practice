@@ -1,80 +1,74 @@
-# Google Cloud Run Services
+# google-cloud-practice
 
-Google Cloud Run を活用し、Python ベースの Web API および非同期タスク処理ワーカーを運用するためのリファレンス実装です。  
-GitHub Actions と連携し、コンテナイメージのビルドから Cloud Run への自動デプロイまでを管理します。
+Google Cloud の Cloud Run・Workflows・Cloud Storage・BigQuery を試すためのリポジトリです。main ブランチへの push をきっかけに、GitHub Actions が Cloud Run へのデプロイと、SQL ファイルの Cloud Storage へのアップロードを行います。
 
----
+## 構成
 
-## アーキテクチャとデプロイフロー
+| パス | 内容 |
+| --- | --- |
+| `src/functions/<サービス名>/` | Cloud Run で動かす Python の HTTP 関数（[Functions Framework](https://github.com/GoogleCloudPlatform/functions-framework-python)）。ディレクトリ名が Cloud Run のサービス名になります |
+| `src/queries/` | BigQuery で実行する SQL |
+| `src/workflows/` | Workflows の定義。Cloud Storage から SQL を読み込み、BigQuery で実行します |
+| `infra/` | Terraform。手順は [infra/README.md](infra/README.md) にあります |
+| `.devcontainer/` | 開発用の Dev Container（gcloud CLI、Docker CLI、ruff、sqlfluff など） |
+| `.github/workflows/` | デプロイとアップロードを行う GitHub Actions |
+
+## デプロイの流れ
 
 ```mermaid
 flowchart LR
-    Dev["開発者 (Git Push)"] --> GHA["GitHub Actions<br>(deploy.yml)"]
-    subgraph GCP["Google Cloud Platform"]
-        AR["Artifact Registry<br>(Docker イメージ)"]
-        subgraph CloudRun["Cloud Run サービス"]
-            API["api-service<br>(REST API 提供)"]
-            Worker["worker-service<br>(バックグラウンド処理)"]
-        end
+    Push["main への push"]
+    subgraph GHA["GitHub Actions"]
+        Deploy["deploy-gc-cloudrun.yml"]
+        Upload["upload-gcs.yml"]
     end
-    GHA -->|"ビルド & Push"| AR
-    AR -->|"デプロイ"| API
-    AR -->|"デプロイ"| Worker
+    subgraph GC["Google Cloud"]
+        AR["Artifact Registry<br>cloud-run-source-deploy"]
+        Run["Cloud Run"]
+        GCS["Cloud Storage<br>queries/"]
+    end
+    Push -->|"src/functions/ の変更"| Deploy
+    Push -->|"src/queries/ の SQL の変更"| Upload
+    Deploy -->|"イメージを push"| AR
+    AR -->|"gcloud run deploy"| Run
+    Upload -->|"gcloud storage cp / rm"| GCS
 ```
 
----
+| ワークフロー | 実行される条件 | 処理 |
+| --- | --- | --- |
+| [deploy-gc-cloudrun.yml](.github/workflows/deploy-gc-cloudrun.yml) | main への push で `src/functions/` 以下が変わったとき | 変更があったサービスごとに、そのディレクトリの Dockerfile でイメージをビルドして Artifact Registry に push し、同じ名前の Cloud Run サービスにデプロイします。Dockerfile がないサービス（worker-service）は `docker build` が失敗するため、デプロイされません。[`strategy.fail-fast`](https://docs.github.com/ja/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstrategyfail-fast) を指定しておらず既定値の `true` になるため、worker-service のジョブが失敗すると、同じ push で実行中・待機中のほかのサービスのジョブもキャンセルされます |
+| [upload-gcs.yml](.github/workflows/upload-gcs.yml) | main への push で `src/queries/` 以下の `.sql` が変わったとき | 追加・変更した SQL をアップロードし、削除した SQL はバケットからも削除します。名前を変えた SQL は、新しい名前でアップロードして古い名前のものを削除します。`src/queries/<パス>` は `gs://<バケット>/queries/<パス>` に置かれます |
 
-## サービス構成
+Terraform（`infra/`）と Workflows の定義（`src/workflows/`）は、GitHub Actions では反映しません。
 
-```text
-google-cloud-practice/
-├── services/
-│   ├── api-service/          # RESTful API サービス（Flask / FastAPI 等）
-│   │   ├── app.py
-│   │   ├── requirements.txt
-│   │   └── Dockerfile
-│   └── worker-service/       # バックグラウンドタスク処理サービス
-│       ├── app.py
-│       ├── requirements.txt
-│       └── Dockerfile
-└── .github/workflows/
-    └── deploy.yml            # CI/CD パイプライン定義
-```
+Google Cloud への認証には Workload Identity 連携を使います。GitHub リポジトリの Secrets に次の値を設定します。
 
----
+| Secret | 使うワークフロー | 内容 |
+| --- | --- | --- |
+| `GC_WORKLOAD_IDENTITY_PROVIDER` | 両方 | Workload Identity プロバイダ |
+| `GC_SERVICE_ACCOUNT` | 両方 | 認証に使うサービスアカウント。Cloud Run サービスの実行サービスアカウントにもなります |
+| `GC_PROJECT_ID` | deploy-gc-cloudrun.yml | プロジェクト ID |
+| `GC_REGION` | deploy-gc-cloudrun.yml | Artifact Registry と Cloud Run のリージョン |
+| `GCS_BUCKET_NAME` | upload-gcs.yml | SQL のアップロード先のバケット名 |
 
-## ローカルでの開発・実行
+## ローカルでの実行
 
-各サービスディレクトリ内で Docker またはローカルの Python 環境を利用して実行できます。
-
-### Docker での実行
+Dockerfile があるサービス（api-service）は、イメージをビルドして起動できます。
 
 ```bash
-# API Service のビルドと起動
-cd services/api-service
+cd src/functions/api-service
 docker build -t api-service .
 docker run -p 8080:8080 api-service
-
-# Worker Service のビルドと起動
-cd ../worker-service
-docker build -t worker-service .
-docker run -p 8081:8080 worker-service
 ```
 
-起動後、`http://localhost:8080/health` や `http://localhost:8081/health` でヘルスチェックを確認できます。
+`http://localhost:8080/` にリクエストすると、Dockerfile の `CMD` で `--target` に指定した関数が応答します。
 
----
+Dockerfile がないサービスは、仮想環境に依存をインストールしてから Functions Framework で起動します。
 
-## デプロイ設定の要点
-
-### 1. 必要な GCP リソース
-- **Cloud Run**: API と Worker の各サービス実行環境
-- **Artifact Registry**: Docker コンテナイメージのリポジトリ
-- **IAM サービスアカウント**: GitHub Actions からデプロイを行うための権限（`roles/run.admin`, `roles/artifactregistry.writer`, `roles/iam.serviceAccountUser`）
-
-### 2. GitHub Secrets
-GitHub リポジトリの Settings → Secrets に以下を設定します。
-- `GCP_SA_KEY`: デプロイ用サービスアカウントの JSON キー
-
-### 3. 自動デプロイ
-`main` ブランチへの push またはプルリクエストのマージをトリガーに、GitHub Actions がコンテナをビルドして Cloud Run へ自動反映します。
+```bash
+cd src/functions/worker-service
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+functions-framework --target main --port 8081
+```

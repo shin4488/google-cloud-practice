@@ -67,17 +67,12 @@ jobs:
         with:
           version: '>= 379.0.0'
 
-      # ← ここから追加：イメージのビルド＆プッシュ
       - name: Build & Push Docker image for ${{ matrix.service }}
         run: |
           gcloud auth configure-docker ${{ secrets.GC_REGION }}-docker.pkg.dev
-          # Artifact Registry の URI を組み立て
           IMAGE_URI=${{ secrets.GC_REGION }}-docker.pkg.dev/${{ secrets.GC_PROJECT_ID }}/cloud-run-source-deploy/${{ matrix.service }}:latest
-          # Docker イメージをビルドして :latest タグを付与
           docker build -t $IMAGE_URI src/functions/${{ matrix.service }}
-          # プッシュ
           docker push $IMAGE_URI
-          # 後続ステップで使えるように環境変数に保存
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
       - name: Prepare labels
@@ -92,12 +87,3 @@ jobs:
             --project ${{ secrets.GC_PROJECT_ID }} \
             --service-account ${{ secrets.GC_SERVICE_ACCOUNT }} \
             --labels=$GC_LABELS
-            # --min-instances 1 \
-            # --max-instances 1 \
-            # --ingress internal \
-            # --memory 512Mi \
-            # --cpu 1 \
-            # --execution-environment gen2 \
-            # --timeout 300 \
-            # --concurrency 3 \
-            # --cpu-boost

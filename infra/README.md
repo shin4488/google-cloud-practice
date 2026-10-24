@@ -1,34 +1,33 @@
-```
-terraform init
-```
+# Terraform
 
-importブロックのtoはルート配下（モジュールを指定しない）を指定する
-```
-terraform plan -generate-config-out="generated.tf"
-```
-generated.tfが生成される条件（以下でないこと）
-- インポート対象リソースに対応する resource ブロックがすでに存在している
-生成対象となる “まだ定義されていない” リソースがないため、何も書き出されずファイルも作られません 
-- 指定した出力ファイルパスが既存ファイルと重複している
-ドキュメントにもあるとおり、既存ファイルを指定するとエラーとなり何も書き込まれません 
-- Terraform バージョンが v1.5 未満
--generate-config-out は Terraform v1.5 からの実験的機能です。バージョンをご確認ください。
+`infra/environments/prod/` がルートモジュールで、`infra/resources/` 以下のモジュールを呼び出します。コマンドは `infra/environments/prod/` で実行します。
 
-importのtoをモジュール参照にしているとリソース定義が必要になるので、モジュール参照ではなくルート参照にする
+## 既存リソースのインポート
+
+1. `terraform init` を実行します。
+2. `import` ブロックの `to` に、モジュールを含まないアドレスを書きます（下の例の「手順 2」）。モジュール内のアドレスを書くと、そのモジュールに resource ブロックが必要になるためです。
+3. `terraform plan -generate-config-out="generated.tf"` を実行し、resource ブロックを generated.tf に出力します。
+4. generated.tf の内容をもとに、`infra/resources/` のモジュールに resource ブロックを書きます。
+5. `import` ブロックの `to` を、resource ブロックを書いたモジュールのアドレス（下の例の「手順 5」）に書き換え、generated.tf を削除します。
+
 ```terraform
-# NG
+# 手順 2: 設定を生成するときのアドレス
 import {
-  to = module.resources.google_storage_bucket.workflows_sports       # 任意：Terraform 内でのローカル識別子
-  id = "workflows-sports"                           # 必須：GCS 上のバケット名と完全一致
+  to = google_storage_bucket.workflows_sports
+  id = "workflows-sports"
 }
-```
-```terraform
-# OK
+
+# 手順 5: モジュールに resource ブロックを書いた後のアドレス
 import {
-  to = google_storage_bucket.workflows_sports       # 任意：Terraform 内でのローカル識別子
-  id = "workflows-sports"                           # 必須：GCS 上のバケット名と完全一致
+  to = module.storage.google_storage_bucket.workflows_sports
+  id = "workflows-sports"
 }
 ```
 
-generated.tfに出力された内容をもとにresourceブロックを記述する
-generated.tfの内容は削除する
+次の場合、generated.tf は作られません。
+
+| 条件 | 理由 |
+| --- | --- |
+| インポート対象の resource ブロックがすでにある | 生成する設定がない |
+| 出力先に既存のファイルを指定した | Terraform がエラーにする |
+| Terraform が v1.5 未満 | `-generate-config-out` は v1.5 で実験的機能として追加された |
