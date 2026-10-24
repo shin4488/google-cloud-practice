@@ -51,6 +51,23 @@ Google Cloud への認証には Workload Identity 連携を使います。GitHub
 | `GC_REGION` | deploy-gc-cloudrun.yml | Artifact Registry と Cloud Run のリージョン |
 | `GCS_BUCKET_NAME` | upload-gcs.yml | SQL のアップロード先のバケット名 |
 
+## Workflows の定義の反映
+
+`src/workflows/` の定義は、Google Cloud コンソールか `gcloud workflows deploy` でデプロイします。定義は次の値を[ユーザー定義の環境変数](https://docs.cloud.google.com/workflows/docs/use-environment-variables)から読むため、デプロイのときに設定します。
+
+| 環境変数 | 内容 |
+| --- | --- |
+| `GCS_BUCKET_NAME` | SQL を読み込むバケット名。upload-gcs.yml の Secret `GCS_BUCKET_NAME` と同じバケットを指定します |
+
+gcloud CLI では `--set-env-vars` で設定します。コンソールでは、ワークフローの作成・編集の画面にある環境変数の欄で設定します。
+
+```bash
+gcloud workflows deploy <ワークフロー名> \
+  --source=src/workflows/baseball-management.yml \
+  --location=<リージョン> \
+  --set-env-vars=GCS_BUCKET_NAME=<バケット名>
+```
+
 ## ローカルでの実行
 
 Dockerfile があるサービス（api-service）は、イメージをビルドして起動できます。
