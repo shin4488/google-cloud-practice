@@ -2,9 +2,9 @@
 FROM python:3.14-slim
 
 # 標準出力をバッファせず、print などの出力がすぐに Cloud Run のログに出るようにする
-ENV PYTHONUNBUFFERED True
+ENV PYTHONUNBUFFERED=True
 
-# requirements.txt をコードと別にコピーすることで、コードの変更毎に pip install が再実行されるのを防止
+# requirements.txt だけを先にコピーし、コードだけを変えたときは pip install の層をビルドキャッシュから再利用する
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 

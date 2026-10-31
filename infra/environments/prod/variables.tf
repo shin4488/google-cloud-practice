@@ -35,6 +35,6 @@ variable "owner_email" {
 }
 
 variable "owner_roles" {
-  type        = list
+  type        = list(any)
   description = "オーナー用のロール"
 }
