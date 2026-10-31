@@ -1,7 +1,7 @@
 # Debian 12 (bookworm) ベースの Dev Containers Python 3.14
 FROM mcr.microsoft.com/devcontainers/python:3.14-bookworm
 
-# Google Cloud SDK を APT 経由でインストール（バージョン固定したければ "=<version>" 指定）
+# Google Cloud CLI を APT でインストールする。版を固定するときは、パッケージ名の後に "=<version>" を付ける
 RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
    | gpg --dearmor -o /etc/apt/keyrings/cloud.google.gpg \
   && echo "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] \
