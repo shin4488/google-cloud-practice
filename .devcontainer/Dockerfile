@@ -1,5 +1,5 @@
-# Debian 12 (bookworm) ベースの Dev Containers Python 3.14
-FROM mcr.microsoft.com/devcontainers/python:3.14-bookworm
+# Debian 13 (trixie) ベースの Dev Containers Python 3.14
+FROM mcr.microsoft.com/devcontainers/python:3.14-trixie
 
 # Google Cloud CLI を APT でインストールする。版を固定するときは、パッケージ名の後に "=<version>" を付ける
 RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
