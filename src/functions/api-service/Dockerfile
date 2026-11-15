@@ -1,5 +1,5 @@
 # https://zenn.dev/abaoaqu/articles/00f87b9f99bc9e
-FROM python:3.14-slim
+FROM python:3.15-slim
 
 # 標準出力をバッファせず、print などの出力がすぐに Cloud Run のログに出るようにする
 ENV PYTHONUNBUFFERED=True
